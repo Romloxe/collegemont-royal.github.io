@@ -25,6 +25,7 @@ const processFile = (srcPath, dstPath, noTransform = false) => {
 };
 
 const build = (baseUrl, siteName) => {
+  const fileProcessorErrors = [];
   const fileProcessors = [];
 
   const processDir = async (dirPath = ".", noTransform = false) => {
@@ -40,17 +41,28 @@ const build = (baseUrl, siteName) => {
       if (await isDirectory(itemPath)) {
         await processDir(itemPath, itemIsTransformExcluded);
       } else {
-        fileProcessors.push(processFile(itemPath, path.join("dist", siteName, itemPath), itemIsTransformExcluded));
+        fileProcessors.push(
+          processFile(itemPath, path.join("dist", siteName, itemPath), itemIsTransformExcluded).catch((err) => {
+            fileProcessorErrors.push(err);
+          })
+        );
       }
     }
   };
 
-  return (
-    processDir()
-      .then(() => createSitemap(baseUrl, "files/cells.json"))
-      .then((sitemap) => writeFile(path.join("dist", siteName, "sitemap.xml"), sitemap, "utf8"))
-      .then(() => Promise.all(fileProcessors))
-  );
+  return processDir()
+    .then(() => createSitemap(baseUrl, "files/cells.json"))
+    .then((sitemap) => writeFile(path.join("dist", siteName, "sitemap.xml"), sitemap, "utf8"))
+    .then(() => Promise.all(fileProcessors))
+    .then(() => {
+      if (fileProcessorErrors.length) {
+        const err = new Error(fileProcessorErrors.length + " error(s) occured when processing files");
+        err.name = "FileProcessingError";
+        err.errors = fileProcessorErrors;
+        err.stack = "";
+        throw err;
+      }
+    });
 };
 
 module.exports = build;

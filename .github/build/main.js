@@ -1,18 +1,17 @@
 const fs = require("fs");
 const { promisify } = require("util");
-const { Octokit } = require("octokit");
-const build = require("./build");
 const path = require("path");
 const ghPages = require("gh-pages");
 
-const ROOT_PATH = process.cwd();
+const build = require("./build");
+const Deployment = require("./Deployment");
 
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO = process.env.GITHUB_REPOSITORY;
 const [REPO_OWNER, REPO_NAME] = REPO.split("/");
 const REF = process.env.GITHUB_REF;
 const [REF_TYPE, REF_NAME] = REF.split("/").slice(1, 3);
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 const publish = promisify(ghPages.publish);
 
 let environment, siteName;
@@ -39,48 +38,32 @@ if (siteName) {
   deployUrl += "/" + siteName;
 }
 
-const deploy = async (deploymentId) => {
-  await octokit.rest.repos.createDeploymentStatus({
-    deployment_id: deploymentId,
-    owner: REPO_OWNER,
-    repo: REPO,
-    state: "in_progress",
-  });
-
-  await build(deployUrl, siteName);
-
-  await publish(path.join("dist", siteName), {
+const deploy = () =>
+  publish(path.join("dist", siteName), {
     dest: siteName,
     user: {
       name: "github-actions",
       email: "support+actions@github.com",
     },
+    repo: "https://Romloxe:" + GITHUB_TOKEN + "@github.com/" + REPO + ".git",
   });
-
-  await octokit.rest.repos.createDeploymentStatus({
-    deployment_id: deploymentId,
-    owner: REPO_OWNER,
-    repo: REPO,
-    state: "success",
-    environment_url: deployUrl,
-  });
-};
 
 const main = () => {
-  let deploymentId;
-  return octokit.rest.repos
-    .createDeployment({ environment, owner: REPO_OWNER, ref: REF, repo: REPO })
-    .then((response) => (deploymentId = response.data.id))
-    .then(deploy)
-    .catch(async (err) => {
-      await octokit.rest.repos.createDeploymentStatus({
-        deployment_id: deploymentId,
-        owner: REPO_OWNER,
-        repo: REPO,
-        state: "failure",
-      });
-      throw err;
-    });
+  const deployment = new Deployment(REPO_OWNER, REPO_NAME, environment, REF);
+  return deployment
+    .create(GITHUB_TOKEN)
+    .then(() => build(deployUrl, siteName))
+    .then(() => deployment.setState("in_progress"))
+    .then(() => deploy())
+    .then(() => deployment.setState("success", deployUrl))
+    .catch((err) =>
+      deployment
+        .setState(err.name == "FileProcessingError" ? "failure" : "error")
+        .catch()
+        .then(() => {
+          throw err;
+        })
+    );
 };
 
 module.exports = main;
