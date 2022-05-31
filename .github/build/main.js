@@ -26,9 +26,6 @@ const deploy = () => {
 };
 
 const main = () => {
-  const evaluatedContext = context();
-  console.log("Running with context:", evaluatedContext);
-
   const deployment = new Deployment(REPO_OWNER, REPO_NAME, environment, deployRef);
   return deployment
     .create(GITHUB_TOKEN)

@@ -49,4 +49,6 @@ const context = {
   deployRef,
 };
 
+console.log("Running with context:", context);
+
 module.exports = context;
