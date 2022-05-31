@@ -15,9 +15,6 @@ let environment, siteName;
 if (REF_TYPE == "pull") {
   environment = "#" + REF_NAME;
   siteName = "PR" + REF_NAME;
-} else if (REF_NAME == "main") {
-  environment = "production";
-  siteName = "";
 } else {
   environment = REF_NAME;
   siteName = REF_NAME;
