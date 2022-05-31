@@ -29,7 +29,7 @@ class Deployment {
   setState(state, url) {
     console.log("Setting deployment state to " + state + " with url " + url);
     if (!this.deployment) {
-      throw new Error("deployment was not created");
+      return Promise.reject("deployment was not created");
     }
 
     return this.octokit.rest.repos.createDeploymentStatus({
