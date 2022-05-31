@@ -2,39 +2,52 @@ const { promisify } = require("util");
 const ghPages = require("gh-pages");
 const build = require("./build");
 const Deployment = require("./Deployment");
-const context = require("./context");
+const {
+  buildId,
+  GITHUB_REPOSITORY_NAME,
+  GITHUB_TOKEN,
+  GITHUB_REPOSITORY_OWNER,
+  environment,
+  REF,
+  deployUrl,
+} = require("./context");
 
 const publish = promisify(ghPages.publish);
-const { GITHUB_TOKEN, REPO, REPO_OWNER, REPO_NAME, environment, siteName, deployUrl, deployRef } = context;
 
 const deploy = () => {
-  console.log("Deploying to dist/builds/" + siteName);
+  console.log("Deploying to dist/builds/" + buildId);
   const publishOptions = {
-    dest: "builds/" + siteName,
+    dest: "builds/" + buildId,
     user: {
       name: "github-actions-bot",
       email: "support+actions@github.com",
     },
     branch: "dist",
-    repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + REPO + ".git",
+    repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + GITHUB_REPOSITORY_NAME + ".git",
   };
   return publish("dist", publishOptions).then(() => console.log("Deployed"));
 };
 
 const main = () => {
-  const deployment = new Deployment(REPO_OWNER, REPO_NAME, environment, deployRef);
+  console.log("Starting build");
+  const deployment = new Deployment(GITHUB_REPOSITORY_OWNER, GITHUB_REPOSITORY_NAME, environment, REF);
   return deployment
     .create(GITHUB_TOKEN)
     .then(() => build())
     .then(() => deployment.setState("in_progress"))
     .then(() => deploy())
     .then(() => deployment.setState("success", deployUrl))
-    .catch((err) =>
+    .catch((err) => {
+      console.log("Build failed");
+      console.error(err);
       deployment
         .setState(err.name == "FileProcessingError" ? "failure" : "error")
         .catch(() => {})
-        .then(() => Promise.reject(err))
-    );
+        .then(() => Promise.reject(err));
+    })
+    .then(() => {
+      console.log("Build succeeded");
+    });
 };
 
 module.exports = main;
