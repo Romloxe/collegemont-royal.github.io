@@ -1,4 +1,3 @@
-
 let link = getUrl();
 let str = get(link);
 let cells = null;
