@@ -10,6 +10,7 @@ const {
   environment,
   REF,
   deployUrl,
+  GITHUB_REPOSITORY,
 } = require("./context");
 
 const publish = promisify(ghPages.publish);
@@ -23,7 +24,7 @@ const deploy = () => {
       email: "support+actions@github.com",
     },
     branch: "dist",
-    repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + GITHUB_REPOSITORY_NAME + ".git",
+    repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + GITHUB_REPOSITORY + ".git",
   };
   return publish("dist", publishOptions).then(() => console.log("Deployed"));
 };
@@ -40,7 +41,7 @@ const main = () => {
     .catch((err) => {
       console.log("Build failed");
       console.error(err);
-      deployment
+      return deployment
         .setState(err.name == "FileProcessingError" ? "failure" : "error")
         .catch(() => {})
         .then(() => Promise.reject(err));

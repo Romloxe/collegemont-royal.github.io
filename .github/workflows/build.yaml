@@ -31,8 +31,9 @@ jobs:
 
   deploy:
     name: Deploy
-    if: ${{ always() }}
+    # if: ${{ always() }}
     needs: build
+    concurrency: deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
