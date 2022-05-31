@@ -12,7 +12,7 @@ const deploy = () => {
   const publishOptions = {
     dest: "build/" + siteName,
     user: {
-      name: "github-actions",
+      name: "github-actions-bot",
       email: "support+actions@github.com",
     },
     branch: "dist",
