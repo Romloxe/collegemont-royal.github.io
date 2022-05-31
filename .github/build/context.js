@@ -6,8 +6,11 @@ const context = () => {
   const REPO = process.env.GITHUB_REPOSITORY;
   const [REPO_OWNER, REPO_NAME] = REPO.split("/");
 
+  const HEAD_REF = process.env.GITHUB_HEAD_REF;
   const REF = process.env.GITHUB_REF;
   const [REF_TYPE, REF_NAME] = REF.split("/").slice(1, 3);
+
+  const deployRef = REF_TYPE == "pull" ? HEAD_REF : REF;
 
   let environment, siteName;
   if (REF_TYPE == "pull") {
@@ -44,6 +47,7 @@ const context = () => {
     environment,
     siteName,
     deployUrl,
+    deployRef,
   };
 };
 

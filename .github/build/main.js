@@ -11,7 +11,7 @@ const publish = promisify(ghPages.publish);
 
 const main = () => {
   const evaluatedContext = context();
-  const { GITHUB_TOKEN, REPO, REPO_OWNER, REPO_NAME, REF, environment, siteName, deployUrl } = evaluatedContext;
+  const { GITHUB_TOKEN, REPO, REPO_OWNER, REPO_NAME, environment, siteName, deployUrl, deployRef } = evaluatedContext;
   console.log("Running with context:", evaluatedContext);
 
   const deploy = () => {
@@ -28,7 +28,7 @@ const main = () => {
     return publish(distPath, publishOptions).then(() => console.log("Deployed"));
   };
 
-  const deployment = new Deployment(REPO_OWNER, REPO_NAME, environment, REF);
+  const deployment = new Deployment(REPO_OWNER, REPO_NAME, environment, deplyRef);
   return deployment
     .create(GITHUB_TOKEN)
     .then(() => build(deployUrl, siteName))
