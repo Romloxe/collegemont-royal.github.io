@@ -14,7 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Prepare website
-        run: find . -maxdepth 1 -type d -path "./*" -not -name .git -not -name main -exed cp -R {} main/{} \;
+        run: |
+          mkdir -p builds/main
+          cd builds
+          find . -maxdepth 1 -type d -path "./*" -not -name .git -not -name main -exed cp -R {} main/{} \;
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
