@@ -1,6 +1,12 @@
 const main = require("./main");
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+console.log("Starting action");
+main()
+  .then(() => {
+    console.log("Action succeeded");
+  })
+  .catch((err) => {
+    console.log("Action failed");
+    console.error(err);
+    process.exit(1);
+  });

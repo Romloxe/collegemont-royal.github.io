@@ -48,6 +48,7 @@ const navigatePage = async (pageAbsolutePath, root) => {
 };
 
 exports.createSitemap = async (baseUrl, entryPoint) => {
+  console.log("Creating sitemap...")
   const urls = await navigatePage(entryPoint, true).then((urls) => Promise.all(urls));
   return XML_HEADER + urlsToXml(baseUrl, urls);
 };

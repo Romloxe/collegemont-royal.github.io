@@ -19,9 +19,10 @@ const isCopyExcluded = (path) => copyExcluded.includes(path);
 const isTransformExcluded = (path) => transformExcluded.includes(path);
 
 const processFile = (srcPath, dstPath, noTransform = false) => {
+  console.log("Processing file " + srcPath);
   const extension = path.extname(srcPath);
   const fileProcessor = (!noTransform && fileProcessingFunctions[extension]) || fileProcessingFunctions.default;
-  return fileProcessor(srcPath, dstPath);
+  return fileProcessor(srcPath, dstPath).then(() => console.log("Processed file " + srcPath));
 };
 
 const build = (baseUrl, siteName) => {
@@ -29,6 +30,7 @@ const build = (baseUrl, siteName) => {
   const fileProcessors = [];
 
   const processDir = async (dirPath = ".", noTransform = false) => {
+    console.log("Processing directory " + dirPath);
     await mkdir(path.join("dist", siteName, dirPath), { recursive: true });
 
     const contents = await readdir(dirPath);
@@ -48,13 +50,17 @@ const build = (baseUrl, siteName) => {
         );
       }
     }
+    console.log("Processed directory " + dirPath);
   };
 
+  console.log("Starting build process...");
   return processDir()
     .then(() => createSitemap(baseUrl, "files/cells.json"))
     .then((sitemap) => writeFile(path.join("dist", siteName, "sitemap.xml"), sitemap, "utf8"))
+    .then(() => console.log("Saved sitemap"))
     .then(() => Promise.all(fileProcessors))
     .then(() => {
+      console.log("Build completed with " + fileProcessorErrors.length + " error(s)");
       if (fileProcessorErrors.length) {
         const err = new Error(fileProcessorErrors.length + " error(s) occured when processing files");
         err.name = "FileProcessingError";
