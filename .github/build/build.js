@@ -25,13 +25,13 @@ const processFile = (srcPath, dstPath, noTransform = false) => {
   return fileProcessor(srcPath, dstPath).then(() => console.log("Processed file " + srcPath));
 };
 
-const build = (baseUrl, siteName) => {
+const build = () => {
   const fileProcessorErrors = [];
   const fileProcessors = [];
 
   const processDir = async (dirPath = ".", noTransform = false) => {
     console.log("Processing directory " + dirPath);
-    await mkdir(path.join("dist", siteName, dirPath), { recursive: true });
+    await mkdir(path.join("dist", dirPath), { recursive: true });
 
     const contents = await readdir(dirPath);
     for (let item of contents) {
@@ -44,7 +44,7 @@ const build = (baseUrl, siteName) => {
         await processDir(itemPath, itemIsTransformExcluded);
       } else {
         fileProcessors.push(
-          processFile(itemPath, path.join("dist", siteName, itemPath), itemIsTransformExcluded).catch((err) => {
+          processFile(itemPath, path.join("dist", itemPath), itemIsTransformExcluded).catch((err) => {
             fileProcessorErrors.push(err);
           })
         );
@@ -55,8 +55,8 @@ const build = (baseUrl, siteName) => {
 
   console.log("Starting build process...");
   return processDir()
-    .then(() => createSitemap(baseUrl, "files/cells.json"))
-    .then((sitemap) => writeFile(path.join("dist", siteName, "sitemap.xml"), sitemap, "utf8"))
+    .then(() => createSitemap())
+    .then((sitemap) => writeFile(path.join("dist", "sitemap.xml"), sitemap, "utf8"))
     .then(() => console.log("Saved sitemap"))
     .then(() => Promise.all(fileProcessors))
     .then(() => {

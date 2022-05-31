@@ -9,29 +9,30 @@ const context = require("./context");
 
 const publish = promisify(ghPages.publish);
 
+const { GITHUB_TOKEN, REPO, REPO_OWNER, REPO_NAME, environment, siteName, deployUrl, deployRef } = context;
+
+const deploy = () => {
+  console.log("Deploying to dist/" + siteName);
+  const publishOptions = {
+    dest: siteName,
+    user: {
+      name: "github-actions",
+      email: "support+actions@github.com",
+    },
+    branch: "dist",
+    repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + REPO + ".git",
+  };
+  return publish("dist", publishOptions).then(() => console.log("Deployed"));
+};
+
 const main = () => {
   const evaluatedContext = context();
-  const { GITHUB_TOKEN, REPO, REPO_OWNER, REPO_NAME, environment, siteName, deployUrl, deployRef } = evaluatedContext;
   console.log("Running with context:", evaluatedContext);
-
-  const deploy = () => {
-    const distPath = path.join("dist", siteName);
-    console.log("Deploying " + distPath + " to gh-pages/" + siteName);
-    const publishOptions = {
-      dest: siteName,
-      user: {
-        name: "github-actions",
-        email: "support+actions@github.com",
-      },
-      repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + REPO + ".git",
-    };
-    return publish(distPath, publishOptions).then(() => console.log("Deployed"));
-  };
 
   const deployment = new Deployment(REPO_OWNER, REPO_NAME, environment, deployRef);
   return deployment
     .create(GITHUB_TOKEN)
-    .then(() => build(deployUrl, siteName))
+    .then(() => build())
     .then(() => deployment.setState("in_progress"))
     .then(() => deploy())
     .then(() => deployment.setState("success", deployUrl))

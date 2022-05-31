@@ -3,6 +3,9 @@ const child_process = require("child_process");
 const path = require("path");
 const { promisify } = require("util");
 
+const config = require("./config");
+const context = require("./context");
+
 const readFile = promisify(fs.readFile);
 const exec = promisify(child_process.exec);
 
@@ -14,8 +17,8 @@ const urlToXml =
     return `<url><loc>${baseUrl}${location}</loc><lastmod>${lastMod}</lastmod></url>`;
   };
 
-const urlsToXml = (host, urls) => {
-  return `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(urlToXml(host)).join("")}</urlset>`;
+const urlsToXml = (baseUrl, urls) => {
+  return `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(urlToXml(baseUrl)).join("")}</urlset>`;
 };
 
 const getLastMod = (filePath) =>
@@ -47,8 +50,8 @@ const navigatePage = async (pageAbsolutePath, root) => {
   return urls.flat();
 };
 
-exports.createSitemap = async (baseUrl, entryPoint) => {
-  console.log("Creating sitemap...")
-  const urls = await navigatePage(entryPoint, true).then((urls) => Promise.all(urls));
-  return XML_HEADER + urlsToXml(baseUrl, urls);
+exports.createSitemap = async () => {
+  console.log("Creating sitemap...");
+  const urls = await navigatePage(config.website.entryPoint, true).then((urls) => Promise.all(urls));
+  return XML_HEADER + urlsToXml(context.deployUrl, urls);
 };

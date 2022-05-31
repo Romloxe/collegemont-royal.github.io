@@ -1,12 +1,12 @@
 const main = require("./main");
 
-console.log("Starting action");
+console.log("Starting build");
 main()
   .then(() => {
-    console.log("Action succeeded");
+    console.log("Build succeeded");
   })
   .catch((err) => {
-    console.log("Action failed");
+    console.log("Build failed");
     console.error(err);
     process.exit(1);
   });

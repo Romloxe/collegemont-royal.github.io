@@ -19,6 +19,7 @@ class Deployment {
         environment: this.environment,
         ref: this.ref,
         required_contexts: [],
+        auto_merge: false,
       })
       .then((response) => {
         this.deployment = response.data;

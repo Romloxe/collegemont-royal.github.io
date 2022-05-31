@@ -1,7 +1,19 @@
 const config = {
   files: {
-    exclude: [".git/", ".github/", ".gitignore", "package.json", "package-lock.json", "node_modules/", "dist/"],
+    exclude: [
+      ".git/",
+      ".github/",
+      ".gitignore",
+      "package.json",
+      "package-lock.json",
+      "node_modules/",
+      "dist/",
+    ],
     noTransform: ["site/GeoGendron/"],
+  },
+
+  website: {
+    entryPoint: "files/cells.json",
   },
 
   modules: {
