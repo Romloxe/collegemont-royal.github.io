@@ -10,7 +10,7 @@ const context = () => {
   const [REF_TYPE, REF_NAME] = REF.split("/").slice(1, 3);
 
   let environment, siteName;
-  if (REF_TYPE == "pulls") {
+  if (REF_TYPE == "pull") {
     environment = "#" + REF_NAME;
     siteName = "PR" + REF_NAME;
   } else if (REF_NAME == "main") {
