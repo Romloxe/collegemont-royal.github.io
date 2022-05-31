@@ -8,9 +8,9 @@ const publish = promisify(ghPages.publish);
 const { GITHUB_TOKEN, REPO, REPO_OWNER, REPO_NAME, environment, siteName, deployUrl, deployRef } = context;
 
 const deploy = () => {
-  console.log("Deploying to dist/build/" + siteName);
+  console.log("Deploying to dist/builds/" + siteName);
   const publishOptions = {
-    dest: "build/" + siteName,
+    dest: "builds/" + siteName,
     user: {
       name: "github-actions-bot",
       email: "support+actions@github.com",
