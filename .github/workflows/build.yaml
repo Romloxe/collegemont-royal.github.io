@@ -31,7 +31,7 @@ jobs:
 
   deploy:
     name: Deploy
-    # if: ${{ always() }}
+    if: ${{ needs.build.result != 'failure' }}
     needs: build
     concurrency: deploy
     runs-on: ubuntu-latest
