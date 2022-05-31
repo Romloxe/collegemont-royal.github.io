@@ -18,6 +18,7 @@ class Deployment {
         repo: this.repo,
         environment: this.environment,
         ref: this.ref,
+        required_contexts: [],
       })
       .then((response) => {
         this.deployment = response.data;
