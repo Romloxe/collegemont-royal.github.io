@@ -1,20 +1,16 @@
-const fs = require("fs");
 const { promisify } = require("util");
-const path = require("path");
 const ghPages = require("gh-pages");
-
 const build = require("./build");
 const Deployment = require("./Deployment");
 const context = require("./context");
 
 const publish = promisify(ghPages.publish);
-
 const { GITHUB_TOKEN, REPO, REPO_OWNER, REPO_NAME, environment, siteName, deployUrl, deployRef } = context;
 
 const deploy = () => {
-  console.log("Deploying to dist/" + siteName);
+  console.log("Deploying to dist/build/" + siteName);
   const publishOptions = {
-    dest: siteName,
+    dest: "build/" + siteName,
     user: {
       name: "github-actions",
       email: "support+actions@github.com",
