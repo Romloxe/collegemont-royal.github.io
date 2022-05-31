@@ -28,7 +28,7 @@ const main = () => {
     return publish(distPath, publishOptions).then(() => console.log("Deployed"));
   };
 
-  const deployment = new Deployment(REPO_OWNER, REPO_NAME, environment, deplyRef);
+  const deployment = new Deployment(REPO_OWNER, REPO_NAME, environment, deployRef);
   return deployment
     .create(GITHUB_TOKEN)
     .then(() => build(deployUrl, siteName))
