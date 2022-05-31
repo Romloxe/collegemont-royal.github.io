@@ -27,7 +27,7 @@ const processFile = (srcPath, dstPath, noTransform = false) => {
 const build = (baseUrl, siteName) => {
   const fileProcessors = [];
 
-  const processDir = async (dirPath, noTransform = false) => {
+  const processDir = async (dirPath = ".", noTransform = false) => {
     await mkdir(path.join("dist", siteName, dirPath), { recursive: true });
 
     const contents = await readdir(dirPath);
@@ -46,7 +46,7 @@ const build = (baseUrl, siteName) => {
   };
 
   return (
-    processDir(".")
+    processDir()
       .then(() => createSitemap(baseUrl, "files/cells.json"))
       .then((sitemap) => writeFile(path.join("dist", siteName, "sitemap.xml"), sitemap, "utf8"))
       .then(() => Promise.all(fileProcessors))
