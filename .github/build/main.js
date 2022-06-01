@@ -40,30 +40,34 @@ const publishDeployments = () => {
     },
     branch: "dist",
     repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + GITHUB_REPOSITORY + ".git",
+    add: true,
   };
   return publish("deployments", publishOptions).then(() => console.log("Published deployments"));
-}
+};
 
 const main = () => {
   console.log("Starting build");
   const deployment = new Deployment(GITHUB_REPOSITORY_OWNER, GITHUB_REPOSITORY_NAME, environment, REF, deployUrl);
-  return deployment
-    .create(GITHUB_TOKEN)
-    .then(() => build())
-    .then(() => deployment.setState("in_progress"))
-    .then(() => Promise.all([deploy(), publishDeployments()]))
-    // .then(() => deployment.setState("success"))
-    .catch((err) => {
-      console.log("Build failed");
-      console.error(err);
-      return deployment
-        .setState(err.name == "FileProcessingError" ? "failure" : "error")
-        .catch(() => {})
-        .then(() => Promise.reject(err));
-    })
-    .then(() => {
-      console.log("Build succeeded");
-    });
+  return (
+    deployment
+      .create(GITHUB_TOKEN)
+      .then(() => build())
+      .then(() => deployment.setState("in_progress"))
+      .then(() => deploy())
+      .then(() => publishDeployments())
+      // .then(() => deployment.setState("success"))
+      .catch((err) => {
+        console.log("Build failed");
+        console.error(err);
+        return deployment
+          .setState(err.name == "FileProcessingError" ? "failure" : "error")
+          .catch(() => {})
+          .then(() => Promise.reject(err));
+      })
+      .then(() => {
+        console.log("Build succeeded");
+      })
+  );
 };
 
 module.exports = main;

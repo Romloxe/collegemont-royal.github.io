@@ -4,7 +4,7 @@ const { Octokit } = require("octokit");
 const { promisify } = require("util");
 
 const mkdir = promisify(fs.mkdir);
-const writeFile = promisify(fs.mkdir);
+const writeFile = promisify(fs.writeFile);
 
 class Deployment {
   constructor(owner, repo, environment, ref, url) {
