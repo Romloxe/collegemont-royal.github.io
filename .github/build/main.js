@@ -21,7 +21,7 @@ const deploy = () => {
   const publishOptions = {
     dest: "builds/" + buildId,
     user: {
-      name: "github-actions-bot",
+      name: "github-actions",
       email: "support+actions@github.com",
     },
     branch: "dist",
