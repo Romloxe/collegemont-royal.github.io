@@ -29,10 +29,10 @@ class Deployment {
         auto_merge: false,
       })
       .then(async (response) => {
-        console.log("Deployment created:", this.deployment);
         this.deployment = response.data;
+        console.log("Deployment created:", this.deployment);
         await mkdir("deployments", { recursive: true });
-        await writeFile(path.join("deployments", this.deployment.id), this.url);
+        await writeFile(path.join("deployments", this.deployment.id.toString()), this.url, "utf8");
         return this.deployment;
       });
   }
