@@ -13,7 +13,6 @@ const octokit = new Octokit({ auth: GITHUB_TOKEN });
 const [owner, repo] = GITHUB_REPOSITORY.split("/");
 const state = WORKFLOW_RUN_CONCLUSION == "success" ? "success" : "error";
 
-const removeDeployment = (deploymentId) => exec(`git rm -f deployments/${deploymentId}`);
 const setDeploymentState = async (deploymentId) => {
   const environment_url = await readFile("deployments/" + deploymentId, "utf8");
   await octokit.rest.repos.createDeploymentStatus({
@@ -25,10 +24,15 @@ const setDeploymentState = async (deploymentId) => {
   });
 };
 
-const handleDeployment = (deploymentId) => setDeploymentState(deploymentId).then(() => removeDeployment(deploymentId));
+const removeDeployment = (deploymentId) => exec(`git rm -f deployments/${deploymentId}`);
 
 readdir("deployments")
-  .then((deployments) => Promise.all(deployments.map(handleDeployment)))
+  .then(async (deploymentIds) => {
+    for (let deploymentId of deploymentIds) {
+      await setDeploymentState(deploymentId);
+      await removeDeployment(deploymentId);
+    }
+  })
   .then(() => exec("git config user.name github-actions"))
   .then(() => exec("git config user.email support+actions@github.com"))
   .then(() => exec("git commit -m Updates"))
