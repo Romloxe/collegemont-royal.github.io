@@ -9,8 +9,8 @@ const REF = IS_PULL_REQUEST ? GITHUB_HEAD_REF : GITHUB_REF;
 
 let environment, buildId;
 if (IS_PULL_REQUEST) {
-  environment = "#" + REF_NAME;
-  buildId = "PR" + REF_NAME;
+  environment = "#" + REF_SHORT_NAME;
+  buildId = "PR" + REF_SHORT_NAME;
 } else {
   environment = REF_SHORT_NAME == "main" ? "production" : REF_SHORT_NAME;
   buildId = REF_SHORT_NAME;
