@@ -16,33 +16,31 @@ const {
 
 const publish = promisify(ghPages.publish);
 
-const deploy = () => {
-  console.log("Deploying to dist/builds/" + buildId);
-  const publishOptions = {
-    dest: "builds/" + buildId,
-    user: {
-      name: "github-actions",
-      email: "support+actions@github.com",
-    },
-    branch: "dist",
-    repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + GITHUB_REPOSITORY + ".git",
-  };
-  return publish("dist", publishOptions).then(() => console.log("Deployed"));
+const publishOptions = {
+  user: {
+    name: "github-actions",
+    email: "support+actions@github.com",
+  },
+  branch: "dist",
+  repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + GITHUB_REPOSITORY + ".git",
 };
 
-const publishDeployments = () => {
+const deploy = async () => {
+  console.log("Deploying to dist/builds/" + buildId);
+  await publish("dist", { ...publishOptions, dest: "builds/" + buildId });
+  console.log("Deployed");
+};
+
+const publishDeployments = async () => {
   console.log("Publishing deployments to dist/deployments");
-  const publishOptions = {
-    dest: "deployments",
-    user: {
-      name: "github-actions",
-      email: "support+actions@github.com",
-    },
-    branch: "dist",
-    repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + GITHUB_REPOSITORY + ".git",
-    add: true,
-  };
-  return publish("deployments", publishOptions).then(() => console.log("Published deployments"));
+  await publish("deployments", { ...publishOptions, dest: "deployments", add: true });
+  console.log("Published deployments");
+};
+
+const copyWorkflows = async () => {
+  console.log("Copying workflows to dist");
+  await publish(".github", { ...publishOptions, dest: ".github" });
+  console.log("Copied workflows");
 };
 
 const main = () => {
@@ -51,10 +49,13 @@ const main = () => {
   return (
     deployment
       .create(GITHUB_TOKEN)
-      .then(() => build())
+      .then(build)
       .then(() => deployment.setState("in_progress"))
-      .then(() => deploy())
-      .then(() => publishDeployments())
+      .then(deploy)
+      .then(publishDeployments)
+      .then(() => {
+        if (buildId == "main") return copyWorkflows();
+      })
       // .then(() => deployment.setState("success"))
       .catch((err) => {
         console.log("Build failed");
