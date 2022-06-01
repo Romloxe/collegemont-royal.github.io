@@ -30,15 +30,29 @@ const deploy = () => {
   return publish("dist", publishOptions).then(() => console.log("Deployed"));
 };
 
+const publishDeployments = () => {
+  console.log("Publishing deployments to dist/deployments");
+  const publishOptions = {
+    dest: "deployments",
+    user: {
+      name: "github-actions",
+      email: "support+actions@github.com",
+    },
+    branch: "dist",
+    repo: "https://git:" + GITHUB_TOKEN + "@github.com/" + GITHUB_REPOSITORY + ".git",
+  };
+  return publish("deployments", publishOptions).then(() => console.log("Published deployments"));
+}
+
 const main = () => {
   console.log("Starting build");
-  const deployment = new Deployment(GITHUB_REPOSITORY_OWNER, GITHUB_REPOSITORY_NAME, environment, REF);
+  const deployment = new Deployment(GITHUB_REPOSITORY_OWNER, GITHUB_REPOSITORY_NAME, environment, REF, deployUrl);
   return deployment
     .create(GITHUB_TOKEN)
     .then(() => build())
     .then(() => deployment.setState("in_progress"))
-    .then(() => deploy())
-    .then(() => deployment.setState("success", deployUrl))
+    .then(() => Promise.all([deploy(), publishDeployments()]))
+    // .then(() => deployment.setState("success"))
     .catch((err) => {
       console.log("Build failed");
       console.error(err);
