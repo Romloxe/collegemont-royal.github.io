@@ -33,7 +33,9 @@ jobs:
     name: Deploy
     if: ${{ needs.build.result != 'failure' }}
     needs: build
-    concurrency: deploy
+    concurrency:
+      group: deploy
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
