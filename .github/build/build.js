@@ -55,9 +55,9 @@ const build = () => {
 
   console.log("Starting build process...");
   return processDir()
-    .then(() => createSitemap())
-    .then((sitemap) => writeFile(path.join("dist", "sitemap.xml"), sitemap, "utf8"))
-    .then(() => console.log("Saved sitemap"))
+    // .then(() => createSitemap())
+    // .then((sitemap) => writeFile(path.join("dist", "sitemap.xml"), sitemap, "utf8"))
+    // .then(() => console.log("Saved sitemap"))
     .then(() => Promise.all(fileProcessors))
     .then(() => {
       console.log("Build completed with " + fileProcessorErrors.length + " error(s)");
