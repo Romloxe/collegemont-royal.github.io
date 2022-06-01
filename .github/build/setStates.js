@@ -11,7 +11,8 @@ const { GITHUB_TOKEN, GITHUB_REPOSITORY, WORKFLOW_RUN_CONCLUSION } = process.env
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 const [owner, repo] = GITHUB_REPOSITORY.split("/");
-const state = WORKFLOW_RUN_CONCLUSION == "success" ? "success" : "error";
+const success = WORKFLOW_RUN_CONCLUSION == "success";
+const state = success ? "success" : "error";
 
 const setDeploymentState = async (deploymentId) => {
   const environment_url = await readFile("deployments/" + deploymentId, "utf8");
@@ -30,7 +31,9 @@ readdir("deployments")
   .then(async (deploymentIds) => {
     for (let deploymentId of deploymentIds) {
       await setDeploymentState(deploymentId);
-      await removeDeployment(deploymentId);
+      if (success) {
+        await removeDeployment(deploymentId);
+      }
     }
   })
   .then(() => exec("git config user.name github-actions"))
@@ -39,6 +42,10 @@ readdir("deployments")
   .then(() => exec(`git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git`))
   .then(() => exec("git push"))
   .catch((err) => {
-    console.error(err);
-    process.exit(1);
+    if (err.code == 'ENOENT') {
+      console.log("No deployments");
+    } else {
+      console.error(err);
+      process.exit(1);
+    }
   });
