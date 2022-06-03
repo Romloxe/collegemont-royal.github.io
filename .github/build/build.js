@@ -66,6 +66,7 @@ const build = () => {
         err.name = "FileProcessingError";
         err.errors = fileProcessorErrors;
         err.stack = "";
+        console.error(err);
         throw err;
       }
     });
