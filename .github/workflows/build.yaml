@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: "16"
       - name: Install dependencies
-        run: npm install browserify babelify @babel/core @babel/preset-env core-js@3 tinyify html-minifier postcss cssnano gh-pages octokit
+        run: npm install browserify babelify @babel/core @babel/preset-env core-js@3 tinyify html-minifier postcss cssnano
       - name: Build
         run: node .github/build
         env:
